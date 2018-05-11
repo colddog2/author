@@ -6,12 +6,23 @@
 			data: React.PropTypes.array.isRequired
 
 		},	
-		getInitialState: function() {
-
-			return this.props.data.selectGame();
-		},
-
-		render() {
+		getInitialState: function () {
+            return _.extend({
+                bgClass: 'neutral',
+                showContinue: false,
+            }, this.props.data.selectGame());
+        },
+ 		handleBookSelected: function(title) {
+            var isCorrect = this.state.checkAnswer(title);
+            this.setState({
+                bgClass: isCorrect ? 'pass' : 'fail',
+                showContinue: isCorrect
+            });
+        },
+        handleContinue: function () {
+            this.setState(this.getInitialState());
+        },
+		render: function() {
 			return <div>
 				<div className="row">
 					<div className="col-md-4">
@@ -19,31 +30,62 @@
 					</div>
 					<div className="col-md-7">
 						{this.state.books.map(function (b) {
-							return <Book title={b}/>
+							return <Book onBookSelected={this.handleBookSelected}title={b}/>
 						}, this)}			
 					</div>
 
-					<div className="col-md-1">
+                    <div className={"col-md-1 " + this.state.bgClass} />
 					
-					</div>
 				</div>
+				 {this.state.showContinue ? (
+                        <div className="row">
+                            <div className="col-md-12">
+                                <input onClick={this.handleContinue} type="button" className="btn btn-primary btn-lg pull-right" value="Continue" />
+                            </div>                        
+                        </div>) : <span/>
+                    }  
 			</div>;
 			}
 	});
 
-	var data = [{
-		name: "Stephan King",
-		imageUrl: "images/authors/stephanking.jpg",
-		books: ["The Shining", "IT"]
-	},{
-		name: "J.K Rowling",
-		imageUrl: "images/authors/jkrowling.jpg",
-		books: ["Harry Potter"]
-	},{
-		name: "Charles Dickens",
-		imageUrl: "images/authors/charlesdickens.jpg",
-		books: ["David Copperfield", "A Tale of Two cities"]
-	}];
+	 var data = [
+        {
+            name: 'Mark Twain', 
+            imageUrl: 'images/authors/marktwain.jpg',
+            books: ['The Adventures of Huckleberry Finn']
+        },
+        {
+            name: 'Joseph Conrad',
+            imageUrl: 'images/authors/josephconrad.png',
+            books: ['Heart of Darkness']
+        },
+        {
+            name: 'J.K. Rowling',
+            imageUrl: 'images/authors/jkrowling.jpg',
+            imageSource: 'Wikimedia Commons',
+            imageAttribution: 'Daniel Ogren',
+            books: ['Harry Potter and the Sorcerers Stone']
+        },
+        {
+            name: 'Stephen King',
+            imageUrl: 'images/authors/stephenking.jpg',
+            imageSource: 'Wikimedia Commons',
+            imageAttribution: 'Pinguino',
+            books: ['The Shining','IT']
+        },
+        {
+            name: 'Charles Dickens',
+            imageUrl: 'images/authors/charlesdickens.jpg',
+            imageSource: 'Wikimedia Commons',
+            books: ['David Copperfield', 'A Tale of Two Cities']
+        },
+        {
+            name: 'William Shakespeare',
+            imageUrl: 'images/authors/williamshakespeare.jpg',
+            imageSource: 'Wikimedia Commons',
+            books: ['Hamlet', 'Macbeth', 'Romeo and Juliet']
+        }
+    ];
 
 
 	data.selectGame = function() {
@@ -56,7 +98,12 @@
 		});
 		return {
 			books,
-			author 
+			author,
+			checkAnswer: function (title) {
+                return this.author.books.some(function (t) {
+                    return t === title;
+                });
+            } 
 		}
 
 
@@ -69,9 +116,13 @@
 			title: React.PropTypes.string.isRequired
 
 		},	
+		handleClick: function () {
+            this.props.onBookSelected(this.props.title);
+        },
+
 
 		render() {
-			return  <div className="answer"><h4>{this.props.title}</h4></div>;
+			return  <div className="answer" onClick={this.handleClick}><h4>{this.props.title}</h4></div>;
 		}
 	})
 
